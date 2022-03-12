@@ -1,0 +1,89 @@
+#field {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 4px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+#field>div {
+  position: relative;
+  padding: 5px;
+}
+
+#field img {
+  width: 100%;
+}
+
+.board4 {
+  flex: 25%;
+  max-width: 25%;
+  box-sizing: border-box;
+}
+
+.board5 {
+  flex: 20%;
+  max-width: 20%;
+  box-sizing: border-box;
+}
+
+.board6 {
+  flex: 16.66666%;
+  max-width: 16.66666%;
+  box-sizing: border-box;
+}
+
+img {
+  margin: 0;
+  display: block;
+}
+
+.covered, .uncovered {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+}
+
+.uncovered {
+  display: none;
+}
+
+.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 1px 1px 10px 3px rgba(0, 0, 0, .8);
+  border-radius: 5% / 10%;
+  position: absolute;
+  left: 20%;
+  top: 30%;
+  width: 50vw;
+  height: 30vh;
+}
+
+.show > * {
+  font-size: 1.2rem;
+  margin: .5rem auto;
+}
+
+#turnTimer {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: baseline;
+  margin-block-start: 1rem;
+}
+
+@media screen and (min-width: 768px) {
+  #field {
+    max-width: 768px;
+  }
+
+  #field .covered, #field .uncovered {
+    width: calc(100% - 10px);
+  }
+
+}
+

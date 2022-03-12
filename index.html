@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Cardgame</title>
+	<link href="css/game.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div id="field"></div>
+<div id="startField" class="show">
+	<p id="playerName"></p>
+<label for="board_size"></label>
+<select name="board_size" id="board_size">
+	<option value="0" disabled selected>
+		Kies een speelveld
+	</option>
+	<option value="4">4 x 4</option>
+	<option value="5">5 x 5</option>
+	<option value="6">6 x 6</option>
+</select>
+</div>
+<div id="turnTimer">
+	<p>turns: <span id="turnCount"></span></p>
+	<p>time: <span id="minutes">00</span> : <span id="seconds">00</span></p>
+	<button id="resetGameBtn">Reset</button>
+</div>
+<div id="endField" class="show">
+	<h2>Congratulations!</h2>
+	<p>All sets are found.</p>
+	<p>Completed in <span id="endTurn"></span> turns</p>
+	<p>Your time: <span id="endMinutes"></span> : <span id="endSeconds"></span></p>
+	<button id="playAgain">Play again?</button>
+</div>
+		
+	<script src="js/memory.js" type="module"></script>
+</body>
+</html>
