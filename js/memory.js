@@ -66,7 +66,9 @@ const totalStatsDiv = {
 
 // switch user elements
 const switchUserDiv = {
-    switchUser: document.getElementById('switchUser')
+    switchUser: document.getElementById('switchUser'),
+    allUsers: document.getElementById('allUsers'),
+    newUser: document.getElementById('newUser')
 }
 
 // get card data from json file
@@ -75,6 +77,22 @@ fetch("./cards.json")
     .then(data => {
         myCardArray = data.map(card => new Card(card))
     })    
+
+// init game
+window.addEventListener('load', () => {
+    startOfGame();
+    let user = ls.getUser();
+    if (typeof(user) === 'string') {
+        startFieldDiv.playerName.innerHTML = user;
+    } else {
+        currentUser.name = user.name;
+        currentUser.played = user.played;
+        currentUser.succes = user.succes;
+        console.log(currentUser);
+        startFieldDiv.playerName.innerHTML = `hello ${currentUser.name}`; 
+    }
+    //ls.updateCurrentUser(currentUser);
+});
 
 // event listeners
 
@@ -103,21 +121,6 @@ totalStatsDiv.backToStart.addEventListener('click', () => {
     totalStatsDiv.totalStats.style.display = 'none';
     startFieldDiv.startField.style.display = 'flex';
 })
-// init game
-window.addEventListener('load', () => {
-    startOfGame();
-    let user = ls.getUsers();
-    if (typeof(user) === 'string') {
-        startFieldDiv.playerName.innerHTML = user;
-    } else {
-        currentUser.name = user.name;
-        currentUser.played = user.played;
-        currentUser.succes = user.succes;
-        console.log(currentUser);
-        startFieldDiv.playerName.innerHTML = `hello ${currentUser.name}`; 
-    }
-    ls.updateCurrentUser(currentUser);
-});
 
 // set up click event for span to show player statistics
 startFieldDiv.gameStats.addEventListener('click', () => {
@@ -128,8 +131,34 @@ startFieldDiv.gameStats.addEventListener('click', () => {
     totalStatsDiv.bestTime.innerHTML = 'TODO';
     totalStatsDiv.averageTime.innerHTML = 'Todo';
     totalStatsDiv.succesRate.innerHTML = currentUser.succes;
-
 });
+
+startFieldDiv.changeUser.addEventListener('click', () => {
+    switchUserDiv.switchUser.style.display = 'flex';
+    startFieldDiv.startField.style.display = 'none';
+    while (switchUserDiv.allUsers.hasChildNodes()) {
+        switchUserDiv.allUsers.removeChild(switchUserDiv.allUsers.firstChild);
+    }
+    let users = ls.getUsers();
+    for (let user in users) {
+        let li = document.createElement('li');
+        li.innerHTML = users[user].name;
+        // set up click event to switch existing users
+        li.addEventListener('click', (e) => {
+           currentUser = ls.switchCurrentUser(e.target.innerHTML);
+        })
+        switchUserDiv.allUsers.appendChild(li);
+    }
+})
+
+switchUserDiv.newUser.addEventListener('click', () => {
+    let user = ls.addNewPlayer();
+    currentUser.name = user.name;
+    currentUser.played = user.played;
+    currentUser.succes = user.succes;
+    startFieldDiv.playerName.innerHTML =`hello ${currentUser.name}`;
+    startOfGame();
+})
 
 // set up the game
 function populateField(board) {
@@ -137,7 +166,6 @@ function populateField(board) {
     interval = setInterval(gameTime, 1000);
     currentUser.played++;
     let myCardSet = createCardDeck(board, myCardArray);
-    console.log(myCardSet);
     myCardSet.forEach((elem) => {
         // create div and img elements
         let newTile = document.createElement('div');
