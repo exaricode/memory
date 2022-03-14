@@ -8,9 +8,15 @@
 </head>
 
 <body>
-
+<!-- field for cards -->
 <div id="field"></div>
+
+<!-- starting screen -->
 <div id="startField" class="show">
+	<p id="gameSetting">
+		<span id="changeUser">Change User</span>
+		<span id="gameStats">Statistics</span>
+	</p>
 	<p id="playerName"></p>
 <label for="board_size"></label>
 <select name="board_size" id="board_size">
@@ -22,11 +28,13 @@
 	<option value="6">6 x 6</option>
 </select>
 </div>
+<!-- game statistics -->
 <div id="turnTimer">
 	<p>turns: <span id="turnCount"></span></p>
 	<p>time: <span id="minutes">00</span> : <span id="seconds">00</span></p>
 	<button id="resetGameBtn">Reset</button>
 </div>
+<!-- end of game screen -->
 <div id="endField" class="show">
 	<h2>Congratulations!</h2>
 	<p>All sets are found.</p>
@@ -34,6 +42,17 @@
 	<p>Your time: <span id="endMinutes"></span> : <span id="endSeconds"></span></p>
 	<button id="playAgain">Play again?</button>
 </div>
+<!-- statistics for current player -->
+<div id="totalStats" class="show">
+	<p>Total games played: <span></span></p>
+	<p>Total games completed: <span></span></p>
+	<p>Best time: <span></span></p>
+	<p>Average time: <span></span></p>
+	<p>Completion: <span></span></p>
+</div>
+
+<!-- switch user -->
+<div id="switchUser" class="show"></div>
 		
 	<script src="js/memory.js" type="module"></script>
 </body>

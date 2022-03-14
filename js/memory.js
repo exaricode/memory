@@ -1,20 +1,20 @@
 "use strict";
+import * as ls from './localstorage.js';
+
 const myField = document.getElementById('field');
 const boardSize = document.getElementById('board_size');
-// const turnCount = document.getElementById('turnCount');
-/* const startField = document.getElementById('startField');
-const playerName = document.getElementById('playerName'); */
-/* const turnTimer = document.getElementById('turnTimer');
-const minutes = document.getElementById('minutes');
-const seconds = document.getElementById('seconds'); */
 const resetGameBtn = document.getElementById('resetGameBtn');
-// const endField = document.getElementById('endField');
 
 let myCardArray;
 let clickCount = 0;
 let tempCard1, tempCard2;
 let numSets = 0;
 let foundSets = 0;
+let currentUser = {
+    "name": '',
+    "played": '',
+    "succes": ''
+}
 
 class Card {
     constructor(cardObject){
@@ -28,7 +28,9 @@ class Card {
 // start field elements
 const startFieldDiv = {
     startField: document.getElementById('startField'),
-    playerName: document.getElementById('playerName')
+    playerName: document.getElementById('playerName'),
+    gameStats: document.getElementById('gameStats'),
+    changeUser: document.getElementById('changeUser')
 }
 
 // current game elements
@@ -49,11 +51,16 @@ const endFieldDiv = {
     endTurn: document.getElementById('endTurn'),
     playAgain: document.getElementById('playAgain')
 }
-// de volgende regel krijg je vast cadeau:
-/* const myCardArray = ["duck", "kitten", "piglet", "puppy", 
-    "calf", "veal", "lamb", "rooster", "horse", "mouse",
-    "dog", "cat", "goose", "goat", "sheep", "pig", "cow",
-    "chick", "hen"]; */
+
+// statistics field elements
+const totalStatsDiv = {
+    totalStats: document.getElementById('totalStats')
+}
+
+// switch user elements
+const switchUserDiv = {
+    switchUser: document.getElementById('switchUser')
+}
 
 // get card data from json file
 fetch("./cards.json")
@@ -81,13 +88,29 @@ endFieldDiv.playAgain.addEventListener('click', () => {
 
 window.addEventListener('load', () => {
     startOfGame();
-    checkLocalStorage();  
+    let user = ls.getUsers();
+    if (typeof(user) === 'string') {
+        startFieldDiv.playerName.innerHTML = user;
+    } else {
+        currentUser.name = user.name;
+        currentUser.played = user.played;
+        currentUser.succes = user.succes;
+        console.log(currentUser);
+        startFieldDiv.playerName.innerHTML = `hello ${currentUser.name}`; 
+    }
+    
+});
+
+startFieldDiv.gameStats.addEventListener('click', () => {
+    startFieldDiv.startField.style.display = 'none';
+    totalStatsDiv.totalStats.style.display = 'flex';
+
 });
 
 function populateField(board) {
-    //myField.innerHTML = '';
     myField.style.display = 'flex';
     setInterval(gameTime, 1000);
+    currentUser.played++;
     const myCardSet = createCardDeck(board, myCardArray);
     myCardSet.forEach((elem) => {
         // create div and img elements
@@ -129,12 +152,8 @@ function onClickCard(e) {
         myField.removeEventListener('click', onClickCard);
         currentGameStats.turnCount.innerHTML = clickCount / 2;
         setTimeout(checkCards, 1000);
-        if (foundSets === numSets) {
-            // endOfGame();
-        }
     } else {
         tempCard1 = e.target.parentElement.firstChild;
-        console.log(e.target)
     }
 }
 
@@ -235,6 +254,8 @@ function startOfGame() {
     startFieldDiv.startField.style.display = 'flex';
     currentGameStats.turnTimer.style.display = 'none';
     endFieldDiv.endField.style.display = 'none';
+    totalStatsDiv.totalStats.style.display = 'none';
+    switchUserDiv.switchUser.style.display = 'none';
     while (myField.hasChildNodes()) {
         myField.removeChild(myField.firstChild);
     }
@@ -245,6 +266,10 @@ function endOfGame() {
     // check if all sets are found
     if (numSets === foundSets) {
         clearInterval(gameTime);
+        let turns = currentGameStats.turnCount.innerHTML;
+        let time = `${currentGameStats.minutes.innerHTML} : ${currentGameStats.seconds.innerHTML}`;
+        ls.updateHighScore(userName, turns, time);
+        currentUser.succes = currentUser.played;
         endFieldDiv.endField.style.display = 'flex';
         endFieldDiv.endMinutes.innerHTML = currentGameStats.minutes.innerHTML;
         endFieldDiv.endSeconds.innerHTML = currentGameStats.seconds.innerHTML;
@@ -282,23 +307,4 @@ function gameTime() {
     } else {
         currentGameStats.seconds.innerHTML = currentGameStats.sec;
     }
-}
-
-// check and set localstorage for stored items
-function checkLocalStorage() {
-    if (localStorage.getItem('name')){
-        playerName.innerHTML = `hello ${localStorage.getItem('name')}`;
-        } else {
-            // ask user name
-            // TODO: username required or not?
-            let userName = prompt('What is your name?');
-            if (prompt) {
-                localStorage.setItem('name', userName);
-            }
-        }
-}
-
-// update localstorage
-function updateLocalStorage() {
-
 }
