@@ -5,6 +5,7 @@ const myField = document.getElementById('field');
 const boardSize = document.getElementById('board_size');
 const resetGameBtn = document.getElementById('resetGameBtn');
 
+let interval;
 let myCardArray;
 let clickCount = 0;
 let tempCard1, tempCard2;
@@ -12,8 +13,8 @@ let numSets = 0;
 let foundSets = 0;
 let currentUser = {
     "name": '',
-    "played": '',
-    "succes": ''
+    "played": 0,
+    "succes": 0
 }
 
 class Card {
@@ -54,7 +55,13 @@ const endFieldDiv = {
 
 // statistics field elements
 const totalStatsDiv = {
-    totalStats: document.getElementById('totalStats')
+    totalStats: document.getElementById('totalStats'),
+    totalPlay: document.getElementById('totalPlay'),
+    totalComplete: document.getElementById('totalComplete'),
+    bestTime: document.getElementById('bestTime'),
+    averageTime: document.getElementById('averageTime'),
+    succesRate: document.getElementById('succesRate'),
+    backToStart: document.getElementById('backToStart')
 }
 
 // switch user elements
@@ -70,22 +77,33 @@ fetch("./cards.json")
     })    
 
 // event listeners
+
+// set up click event for each displayed card
 myField.addEventListener('click', onClickCard);
 
+// set up change event for select field size
 boardSize.addEventListener('change', (e) => {
     startFieldDiv.startField.style.display = 'none';
     currentGameStats.turnTimer.style.display = 'flex';
     onSelectFieldSize(e);
 });
 
+// set up click event for resetting the game
 resetGameBtn.addEventListener('click', () => {
     startOfGame();
-})
+});
 
+// set up click event for button at end of the game
 endFieldDiv.playAgain.addEventListener('click', () => {
     startOfGame();
-})
+});
 
+// go back to start from statistics
+totalStatsDiv.backToStart.addEventListener('click', () => {
+    totalStatsDiv.totalStats.style.display = 'none';
+    startFieldDiv.startField.style.display = 'flex';
+})
+// init game
 window.addEventListener('load', () => {
     startOfGame();
     let user = ls.getUsers();
@@ -98,20 +116,28 @@ window.addEventListener('load', () => {
         console.log(currentUser);
         startFieldDiv.playerName.innerHTML = `hello ${currentUser.name}`; 
     }
-    
+    ls.updateCurrentUser(currentUser);
 });
 
+// set up click event for span to show player statistics
 startFieldDiv.gameStats.addEventListener('click', () => {
     startFieldDiv.startField.style.display = 'none';
     totalStatsDiv.totalStats.style.display = 'flex';
+    totalStatsDiv.totalPlay.innerHTML = currentUser.played;
+    totalStatsDiv.totalComplete.innerHTML = currentUser.played;
+    totalStatsDiv.bestTime.innerHTML = 'TODO';
+    totalStatsDiv.averageTime.innerHTML = 'Todo';
+    totalStatsDiv.succesRate.innerHTML = currentUser.succes;
 
 });
 
+// set up the game
 function populateField(board) {
     myField.style.display = 'flex';
-    setInterval(gameTime, 1000);
+    interval = setInterval(gameTime, 1000);
     currentUser.played++;
-    const myCardSet = createCardDeck(board, myCardArray);
+    let myCardSet = createCardDeck(board, myCardArray);
+    console.log(myCardSet);
     myCardSet.forEach((elem) => {
         // create div and img elements
         let newTile = document.createElement('div');
@@ -125,7 +151,7 @@ function populateField(board) {
 
         // create cover img element
         let cover = document.createElement('img');
-        cover.setAttribute('src', 'img/cover.png');
+        // cover.setAttribute('src', 'img/cover.png');
         cover.setAttribute('class', 'covered');
         newTile.appendChild(cover);
 
@@ -133,6 +159,7 @@ function populateField(board) {
     })
 }
 
+// switch covered cards
 function onClickCard(e) {
     // show image behind cover
     if (e.target.className === 'covered'){
@@ -151,7 +178,7 @@ function onClickCard(e) {
         tempCard2 = e.target.parentElement.firstChild;
         myField.removeEventListener('click', onClickCard);
         currentGameStats.turnCount.innerHTML = clickCount / 2;
-        setTimeout(checkCards, 1000);
+        setTimeout(checkCards, 100);
     } else {
         tempCard1 = e.target.parentElement.firstChild;
     }
@@ -198,7 +225,7 @@ function onSelectFieldSize(e) {
             break;
     }
     // reset number of turns
-    currentGameStats.turnCount.innerHTML = 0;
+    currentGameStats.turnCount.innerHTML = '';
     populateField(boardClass);
 }
 
@@ -248,9 +275,22 @@ function checkCards() {
     myField.addEventListener('click', onClickCard);
 }
 
-// display a start screen
+// display the start screen
 function startOfGame() {
+    clearInterval(interval);
     boardSize.value = 0;
+    currentGameStats.turnTimer.style.display = 'none';
+    currentGameStats.min = 0;
+    currentGameStats.sec = 0;
+    currentGameStats.minutes.innerHTML = '00';
+    currentGameStats.seconds.innerHTML = '00';
+    currentGameStats.turnCount.innerHTML = '0';
+    myField.style.display = 'none';
+    clickCount = 0;
+    tempCard1 = '';
+    tempCard2 = '';
+    numSets = 0;
+    foundSets = 0;
     startFieldDiv.startField.style.display = 'flex';
     currentGameStats.turnTimer.style.display = 'none';
     endFieldDiv.endField.style.display = 'none';
@@ -265,10 +305,11 @@ function startOfGame() {
 function endOfGame() {
     // check if all sets are found
     if (numSets === foundSets) {
-        clearInterval(gameTime);
+        clearInterval(interval);
         let turns = currentGameStats.turnCount.innerHTML;
         let time = `${currentGameStats.minutes.innerHTML} : ${currentGameStats.seconds.innerHTML}`;
-        ls.updateHighScore(userName, turns, time);
+        ls.updateHighScore(currentUser.name, turns, time);
+        ls.updateCurrentUser(currentUser);
         currentUser.succes = currentUser.played;
         endFieldDiv.endField.style.display = 'flex';
         endFieldDiv.endMinutes.innerHTML = currentGameStats.minutes.innerHTML;
@@ -277,9 +318,10 @@ function endOfGame() {
         currentGameStats.turnTimer.style.display = 'none';
         currentGameStats.min = 0;
         currentGameStats.sec = 0;
-        currentGameStats.turnCount = 0;
+        currentGameStats.minutes.innerHTML = '';
+        currentGameStats.seconds.innerHTML = '';
+        currentGameStats.turnCount.innerHTML = '0';
         myField.style.display = 'none';
-        myCardArray = '';
         clickCount = 0;
         tempCard1 = '';
         tempCard2 = '';

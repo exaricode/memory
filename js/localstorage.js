@@ -6,16 +6,10 @@ function checkLocalStorage() {
     return true
 }
 
+// add a new name to local storage
 function addPlayerName(users) {
-    //let check = checkLocalStorage();
-    let userName;
-    /* if (!check) {
-        return check;
-    } */
+    let userName = prompt('What is your name?');
 
-    if (!users) {
-        userName = prompt('What is your name?');
-    }
     if (userName != null && userName != '') {
         const user = {
             "name": userName,
@@ -30,6 +24,7 @@ function addPlayerName(users) {
     return users[0];
 }
 
+// get all stored users
 function getUsers() {
     let check = checkLocalStorage();
     if (!check) {
@@ -46,11 +41,21 @@ function getUsers() {
     return user;
 }
 
-// update localstorage
-function updateLocalStorage() {
-
+// update current user
+function updateCurrentUser(user) {
+    let users = JSON.parse(localStorage.getItem('users'));
+    
+    for (let item in users) {
+        if (users[item].name === user.name) {
+            users[item].played = user.played;
+            users[item].succes = user.succes;
+        }
+    }
+    
+    localStorage.setItem('users', JSON.stringify(users));
 }
 
+// add new high score
 function updateHighScore(name, count, time) {
     //TODO: create object with unique name
     let score = {
@@ -58,15 +63,13 @@ function updateHighScore(name, count, time) {
         "count": count,
         "time": time
     }
-    //score.push(`{"name": ${name}, "count": ${count}, "time": ${time}`);
-    console.log(score);
     if (localStorage.getItem('highscore')) {
-        let tempHighScore = JSON.parse(localStorage.getItem('highscore'));
+        let tempHighScore = JSON.parse(localStorage.getItem('highscore')) || [];
         tempHighScore.push(score);
         localStorage.setItem('highscore', JSON.stringify(tempHighScore));
     }  else {
-        localStorage.setItem('highscore', JSON.stringify(score));
+        localStorage.setItem('highscore', JSON.stringify([score]));
     }
 }
 
-export { getUsers, updateHighScore, updateLocalStorage }
+export { getUsers, updateHighScore, updateCurrentUser }

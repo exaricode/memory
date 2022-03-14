@@ -70,13 +70,12 @@ img {
   margin: .5rem auto;
 }
 
-.show > *:last-child {
-  margin-block-end: 5rem;
+.show > *:first-child, .show > *:last-child {
+  margin-block-start: auto;
+  margin-block-end: auto;
 }
 
 #gameSetting {
-  justify-self: flex-start;
-  /* align-self: flex-end; */
   display: flex;
   width: 90%;
   justify-content: space-between;
