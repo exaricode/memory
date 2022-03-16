@@ -75,7 +75,7 @@ img {
   margin-block-end: auto;
 }
 
-#gameSetting {
+#startField > p:first-child {
   display: flex;
   width: 90%;
   justify-content: space-between;

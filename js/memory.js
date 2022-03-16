@@ -2,7 +2,7 @@
 import * as ls from './localstorage.js';
 
 const myField = document.getElementById('field');
-const boardSize = document.getElementById('board_size');
+const boardSize = document.getElementById('boardSize');
 const resetGameBtn = document.getElementById('resetGameBtn');
 
 let interval;
@@ -14,7 +14,9 @@ let foundSets = 0;
 let currentUser = {
     "name": '',
     "played": 0,
-    "succes": 0
+    "succes": 0,
+    "best": 0,
+    "rate": 0
 }
 
 class Card {
@@ -31,13 +33,15 @@ const startFieldDiv = {
     startField: document.getElementById('startField'),
     playerName: document.getElementById('playerName'),
     gameStats: document.getElementById('gameStats'),
-    changeUser: document.getElementById('changeUser')
+    changeUser: document.getElementById('changeUser'),
+    highscore: document.getElementById('highscore')
 }
 
 // current game elements
 const currentGameStats = {
     turnTimer: document.getElementById('turnTimer'),
     turnCount: document.getElementById('turnCount'),
+    found: document.getElementById('found'),
     minutes: document.getElementById('minutes'),
     seconds: document.getElementById('seconds'),
     min: 0,
@@ -47,6 +51,7 @@ const currentGameStats = {
 // end field elements
 const endFieldDiv = {
     endField: document.getElementById('endField'),
+    newHighscore: document.getElementById('newHighscore'),
     endMinutes: document.getElementById('endMinutes'),
     endSeconds: document.getElementById('endSeconds'),
     endTurn: document.getElementById('endTurn'),
@@ -58,8 +63,7 @@ const totalStatsDiv = {
     totalStats: document.getElementById('totalStats'),
     totalPlay: document.getElementById('totalPlay'),
     totalComplete: document.getElementById('totalComplete'),
-    bestTime: document.getElementById('bestTime'),
-    averageTime: document.getElementById('averageTime'),
+    bestGame: document.getElementById('bestGame'),
     succesRate: document.getElementById('succesRate'),
     backToStart: document.getElementById('backToStart')
 }
@@ -69,6 +73,13 @@ const switchUserDiv = {
     switchUser: document.getElementById('switchUser'),
     allUsers: document.getElementById('allUsers'),
     newUser: document.getElementById('newUser')
+}
+
+const highScoreDiv = {
+    all: document.getElementById('allHighscores'),
+    hsBtn: Array.from(document.getElementById('hsBtn').children),
+    scores: document.getElementById('scores'),
+    backToStart: document.getElementById('back')
 }
 
 // get card data from json file
@@ -85,13 +96,8 @@ window.addEventListener('load', () => {
     if (typeof(user) === 'string') {
         startFieldDiv.playerName.innerHTML = user;
     } else {
-        currentUser.name = user.name;
-        currentUser.played = user.played;
-        currentUser.succes = user.succes;
-        console.log(currentUser);
-        startFieldDiv.playerName.innerHTML = `hello ${currentUser.name}`; 
+        updateCurrentUser(currentUser, user); 
     }
-    //ls.updateCurrentUser(currentUser);
 });
 
 // event listeners
@@ -108,6 +114,7 @@ boardSize.addEventListener('change', (e) => {
 
 // set up click event for resetting the game
 resetGameBtn.addEventListener('click', () => {
+    ls.updateCurrentUser(currentUser);
     startOfGame();
 });
 
@@ -122,17 +129,17 @@ totalStatsDiv.backToStart.addEventListener('click', () => {
     startFieldDiv.startField.style.display = 'flex';
 })
 
-// set up click event for span to show player statistics
+// set up click event: show player statistics
 startFieldDiv.gameStats.addEventListener('click', () => {
     startFieldDiv.startField.style.display = 'none';
     totalStatsDiv.totalStats.style.display = 'flex';
     totalStatsDiv.totalPlay.innerHTML = currentUser.played;
-    totalStatsDiv.totalComplete.innerHTML = currentUser.played;
-    totalStatsDiv.bestTime.innerHTML = 'TODO';
-    totalStatsDiv.averageTime.innerHTML = 'Todo';
-    totalStatsDiv.succesRate.innerHTML = currentUser.succes;
+    totalStatsDiv.totalComplete.innerHTML = currentUser.succes;
+    totalStatsDiv.bestGame.innerHTML = currentUser.best;
+    totalStatsDiv.succesRate.innerHTML = currentUser.rate + '%';
 });
 
+// set up click event: switch to change user screen
 startFieldDiv.changeUser.addEventListener('click', () => {
     switchUserDiv.switchUser.style.display = 'flex';
     startFieldDiv.startField.style.display = 'none';
@@ -145,27 +152,71 @@ startFieldDiv.changeUser.addEventListener('click', () => {
         li.innerHTML = users[user].name;
         // set up click event to switch existing users
         li.addEventListener('click', (e) => {
-           currentUser = ls.switchCurrentUser(e.target.innerHTML);
+            let user = ls.switchCurrentUser(e.target.innerHTML);
+            updateCurrentUser(currentUser, user);
+            startOfGame();
         })
         switchUserDiv.allUsers.appendChild(li);
     }
-})
+});
 
+// set up click event switch to highscore screen
+startFieldDiv.highscore.addEventListener('click', () => {
+    startFieldDiv.startField.style.display = 'none';
+    highScoreDiv.all.style.display = 'flex';
+    appendHighScores(4);
+});
+
+// set up click event to switch user
 switchUserDiv.newUser.addEventListener('click', () => {
     let user = ls.addNewPlayer();
-    currentUser.name = user.name;
-    currentUser.played = user.played;
-    currentUser.succes = user.succes;
-    startFieldDiv.playerName.innerHTML =`hello ${currentUser.name}`;
-    startOfGame();
+    if (user) {
+        updateCurrentUser(currentUser, user);
+        startOfGame();
+    }   
+});
+
+// set up click event for each highscore button
+highScoreDiv.hsBtn.forEach((elem) => {
+    elem.addEventListener('click', (e) => {
+        appendHighScores(e.target.value);
+    });
+});
+
+// 
+highScoreDiv.backToStart.addEventListener('click', () => {
+    highScoreDiv.all.style.display = 'none';
+    startFieldDiv.startField.style.display = 'flex';
 })
+
+// get all highscores from a boardsize
+function appendHighScores(size) {
+    if (highScoreDiv.scores.children[1]) {
+        highScoreDiv.scores.removeChild(highScoreDiv.scores.children[1]);
+    }
+    let scores = ls.getAllHighScore(size);
+    let len = scores.length;
+    let tbody = document.createElement('tbody');
+    for (let i = 0; i < len; i++) {
+        let tr = document.createElement('tr');
+        for (let s in scores[i]){
+            if ( s !== 'size'){
+                let td = document.createElement('td');
+                td.innerHTML = scores[i][s];
+                tr.appendChild(td);
+            }
+        }
+        tbody.appendChild(tr);
+    }
+    highScoreDiv.scores.appendChild(tbody);
+}
 
 // set up the game
 function populateField(board) {
     myField.style.display = 'flex';
     interval = setInterval(gameTime, 1000);
     currentUser.played++;
-    let myCardSet = createCardDeck(board, myCardArray);
+    let myCardSet = createCardDeck(numSets, myCardArray);
     myCardSet.forEach((elem) => {
         // create div and img elements
         let newTile = document.createElement('div');
@@ -253,32 +304,19 @@ function onSelectFieldSize(e) {
             break;
     }
     // reset number of turns
-    currentGameStats.turnCount.innerHTML = '';
+    currentGameStats.turnCount.innerHTML = '0';
+    currentGameStats.found.innerHTML = '0';
     populateField(boardClass);
 }
 
 // create card deck based on field size
 function createCardDeck(size, arr) {
-    // get last number of size
-    let num = Number(size.match(/\d/));
+   
     arr = shuffle(arr);
     let newDeckSize = [];
 
-    // set number of items to select
-    switch (num) {
-        case 4:
-            num = 8;
-            break;
-        case 5:
-            num = 12;
-            break;
-        case 6:
-            num = 18;
-            break;
-    }
-
     // push num items
-    for (let i = 0; i < num; i++){
+    for (let i = 0; i < size; i++){
         newDeckSize.push(arr[i]);
     }
 
@@ -294,6 +332,7 @@ function checkCards() {
         tempCard1.style.visibility = 'hidden';
         tempCard2.style.visibility = 'hidden';
         foundSets++;
+        currentGameStats.found.innerHTML = foundSets;
         endOfGame();
     } else {
         tempCard1.parentElement.lastChild.className = 'covered';
@@ -336,9 +375,14 @@ function endOfGame() {
         clearInterval(interval);
         let turns = currentGameStats.turnCount.innerHTML;
         let time = `${currentGameStats.minutes.innerHTML} : ${currentGameStats.seconds.innerHTML}`;
-        ls.updateHighScore(currentUser.name, turns, time);
+        let bool = ls.updateHighScore(currentUser.name, turns, time, boardSize.value);
+        
+        if (bool === true) {
+            endFieldDiv.newHighscore.innerHTML = "New High Score!"
+        }
+        currentUser.best = Number(turns);
+        currentUser.succes++;
         ls.updateCurrentUser(currentUser);
-        currentUser.succes = currentUser.played;
         endFieldDiv.endField.style.display = 'flex';
         endFieldDiv.endMinutes.innerHTML = currentGameStats.minutes.innerHTML;
         endFieldDiv.endSeconds.innerHTML = currentGameStats.seconds.innerHTML;
@@ -348,7 +392,8 @@ function endOfGame() {
         currentGameStats.sec = 0;
         currentGameStats.minutes.innerHTML = '';
         currentGameStats.seconds.innerHTML = '';
-        currentGameStats.turnCount.innerHTML = '0';
+        currentGameStats.turnCount.innerHTML = '';
+        currentGameStats.found.innerHTML = '';
         myField.style.display = 'none';
         clickCount = 0;
         tempCard1 = '';
@@ -356,6 +401,16 @@ function endOfGame() {
         numSets = 0;
         foundSets = 0;
     }
+}
+
+// update current user
+function updateCurrentUser(current, user){
+        current.name = user.name;
+        current.played = user.played;
+        current.succes = user.succes;
+        current.best = user.best;
+        current.rate = user.rate;
+        startFieldDiv.playerName.innerHTML =`hello ${current.name}`;
 }
 
 // keep track of time

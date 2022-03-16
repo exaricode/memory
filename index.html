@@ -13,31 +13,33 @@
 
 <!-- starting screen -->
 <div id="startField" class="show">
-	<p id="gameSetting">
+	<p>
 		<span id="changeUser">Change User</span>
+		<span id="highscore">Highscores</span>
 		<span id="gameStats">Statistics</span>
 	</p>
 	<p id="playerName"></p>
-<label for="board_size"></label>
-<select name="board_size" id="board_size">
-	<option value="0" disabled selected>
-		Kies een speelveld
-	</option>
-	<option value="4">4 x 4</option>
-	<option value="5">5 x 5</option>
-	<option value="6">6 x 6</option>
-</select>
+	<label for="boardSize"></label>
+	<select name="boardSize" id="boardSize">
+		<option value="0" disabled selected>
+			Kies een speelveld
+		</option>
+		<option value="4">4 x 4</option>
+		<option value="5">5 x 5</option>
+		<option value="6">6 x 6</option>
+	</select>						
 </div>
 <!-- game statistics -->
 <div id="turnTimer">
 	<p>turns: <span id="turnCount"></span></p>
+	<p>found: <span id="found"></span></p>
 	<p>time: <span id="minutes">00</span> : <span id="seconds">00</span></p>
 	<button id="resetGameBtn">Reset</button>
 </div>
 <!-- end of game screen -->
 <div id="endField" class="show">
 	<h2>Congratulations!</h2>
-	<p>All sets are found.</p>
+	<p id="newHighscore">All sets are found.</p>
 	<p>Completed in <span id="endTurn"></span> turns</p>
 	<p>Your time: <span id="endMinutes"></span> : <span id="endSeconds"></span></p>
 	<button id="playAgain">Play again?</button>
@@ -46,18 +48,35 @@
 <div id="totalStats" class="show">
 	<p >Total games played: <span id="totalPlay"></span></p>
 	<p>Total games completed: <span id="totalComplete"></span></p>
-	<p>Best time: <span id="bestTime"></span></p>
-	<p>Average time: <span id="averageTime"></span></p>
+	<p>Best game: <span id="bestGame"></span></p>
 	<p>Completion: <span id="succesRate"></span></p>
 	<button id="backToStart">Back</button>
 </div>
-
 <!-- switch user -->
 <div id="switchUser" class="show">
 	<ul id="allUsers"></ul>
 	<button id="newUser">New user</button>
 </div>
-		
-	<script src="js/memory.js" type="module"></script>
+<!-- highscore -->
+<div id="allHighscores" class="show">
+	<p id="hsBtn">
+		<button value="4">4 x 4</button>
+		<button value="5">5 x 5</button>
+		<button value="6">6 x 6</button>
+	</p>
+	<table id="scores">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Turns</th>
+				<th>Time</th>
+			</tr>
+		</thead>
+	</table>
+	<button id="back">Back</button>
+</div>
+
+
+<script src="js/memory.js" type="module"></script>
 </body>
 </html>
