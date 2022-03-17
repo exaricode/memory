@@ -65,21 +65,22 @@ const totalStatsDiv = {
     totalComplete: document.getElementById('totalComplete'),
     bestGame: document.getElementById('bestGame'),
     succesRate: document.getElementById('succesRate'),
-    backToStart: document.getElementById('backToStart')
+    back: document.getElementById('totalStatsback')
 }
 
 // switch user elements
 const switchUserDiv = {
     switchUser: document.getElementById('switchUser'),
     allUsers: document.getElementById('allUsers'),
-    newUser: document.getElementById('newUser')
+    newUser: document.getElementById('newUser'),
+    back: document.getElementById('switchUserBack')
 }
 
 const highScoreDiv = {
     all: document.getElementById('allHighscores'),
     hsBtn: Array.from(document.getElementById('hsBtn').children),
     scores: document.getElementById('scores'),
-    backToStart: document.getElementById('back')
+    back: document.getElementById('highscoreBack')
 }
 
 // get card data from json file
@@ -102,34 +103,28 @@ window.addEventListener('load', () => {
 
 // event listeners
 
-// set up click event for each displayed card
+// setup click event for each displayed card
 myField.addEventListener('click', onClickCard);
 
-// set up change event for select field size
+// setup change event for select field size
 boardSize.addEventListener('change', (e) => {
     startFieldDiv.startField.style.display = 'none';
     currentGameStats.turnTimer.style.display = 'flex';
     onSelectFieldSize(e);
 });
 
-// set up click event for resetting the game
+// setup click event for resetting the game
 resetGameBtn.addEventListener('click', () => {
     ls.updateCurrentUser(currentUser);
     startOfGame();
 });
 
-// set up click event for button at end of the game
+// setup click event for button at end of the game
 endFieldDiv.playAgain.addEventListener('click', () => {
     startOfGame();
 });
 
-// go back to start from statistics
-totalStatsDiv.backToStart.addEventListener('click', () => {
-    totalStatsDiv.totalStats.style.display = 'none';
-    startFieldDiv.startField.style.display = 'flex';
-})
-
-// set up click event: show player statistics
+// setup click event: show player statistics
 startFieldDiv.gameStats.addEventListener('click', () => {
     startFieldDiv.startField.style.display = 'none';
     totalStatsDiv.totalStats.style.display = 'flex';
@@ -139,7 +134,7 @@ startFieldDiv.gameStats.addEventListener('click', () => {
     totalStatsDiv.succesRate.innerHTML = currentUser.rate + '%';
 });
 
-// set up click event: switch to change user screen
+// setup click event: switch to change user screen
 startFieldDiv.changeUser.addEventListener('click', () => {
     switchUserDiv.switchUser.style.display = 'flex';
     startFieldDiv.startField.style.display = 'none';
@@ -150,7 +145,7 @@ startFieldDiv.changeUser.addEventListener('click', () => {
     for (let user in users) {
         let li = document.createElement('li');
         li.innerHTML = users[user].name;
-        // set up click event to switch existing users
+        // setup click event to switch existing users
         li.addEventListener('click', (e) => {
             let user = ls.switchCurrentUser(e.target.innerHTML);
             updateCurrentUser(currentUser, user);
@@ -160,14 +155,14 @@ startFieldDiv.changeUser.addEventListener('click', () => {
     }
 });
 
-// set up click event switch to highscore screen
+// setup click event switch to highscore screen
 startFieldDiv.highscore.addEventListener('click', () => {
     startFieldDiv.startField.style.display = 'none';
     highScoreDiv.all.style.display = 'flex';
     appendHighScores(4);
 });
 
-// set up click event to switch user
+// setup click event to switch user
 switchUserDiv.newUser.addEventListener('click', () => {
     let user = ls.addNewPlayer();
     if (user) {
@@ -176,18 +171,32 @@ switchUserDiv.newUser.addEventListener('click', () => {
     }   
 });
 
-// set up click event for each highscore button
+// setup click event for each highscore button
 highScoreDiv.hsBtn.forEach((elem) => {
     elem.addEventListener('click', (e) => {
         appendHighScores(e.target.value);
     });
 });
 
-// 
-highScoreDiv.backToStart.addEventListener('click', () => {
+// setup click event for back
+
+// go back to start from statistics
+totalStatsDiv.back.addEventListener('click', () => {
+    totalStatsDiv.totalStats.style.display = 'none';
+    startFieldDiv.startField.style.display = 'flex';
+});
+
+// go back to start from highscores
+highScoreDiv.back.addEventListener('click', () => {
     highScoreDiv.all.style.display = 'none';
     startFieldDiv.startField.style.display = 'flex';
-})
+});
+
+// go back to start from switch user
+switchUserDiv.back.addEventListener('click', () => {
+    switchUserDiv.switchUser.style.display = 'none';
+    startFieldDiv.startField.style.display = 'flex';
+});
 
 // get all highscores from a boardsize
 function appendHighScores(size) {
@@ -211,7 +220,7 @@ function appendHighScores(size) {
     highScoreDiv.scores.appendChild(tbody);
 }
 
-// set up the game
+// setup the game
 function populateField(board) {
     myField.style.display = 'flex';
     interval = setInterval(gameTime, 1000);
