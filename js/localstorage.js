@@ -19,11 +19,18 @@ function addPlayerName(users) {
             "best": 0,
             "rate": 0
     }
-    if (!users.includes(user.name)) {
+
+    // check if username already exists
+    let t = users.findIndex(elem => elem.name == user.name );
+    
+    if (t != -1) {
+        return false;
+    } else {
         users.unshift(user);
     }
     setUsers(users);
     }
+
     return users[0];
 }
 
@@ -35,6 +42,10 @@ function addNewPlayer(){
         return
     }
     const user = addPlayerName(users);
+    if (user === false) {
+        alert('username already exists');
+        return false;
+    }
     return user;
 }
 
@@ -53,6 +64,7 @@ function setUsers(users) {
     localStorage.setItem('users', JSON.stringify(users));
 }
 
+// get first user if it exists
 function getUser() {
     const users = getUsers();
     let user;
@@ -68,11 +80,15 @@ function getUser() {
 // switch a user
 function switchCurrentUser(e) {
     let users = getUsers();
-    let u;
+    
+    let u = '';
     for (let user in users) {
         if (users[user].name === e) {
             u = users[user];
         }
+    }
+    if (u === '') {
+        return false;
     }
     users.splice(users.indexOf(u),1);
     users.unshift(u);
@@ -99,6 +115,18 @@ function updateCurrentUser(user) {
          
     setUsers(users);
 }
+
+// delete a user
+function deleteUser(user) {
+    console.log(user);
+    let users = getUsers();
+    for (let u in users) {
+        if (users[u].name === user) {
+            users.splice(u, 1);
+        }
+    }
+    setUsers(users);
+} 
 
 // get all highscore
 function getAllHighScore(size, score) {
@@ -147,4 +175,5 @@ function updateHighScore(name, count, time, size) {
 }
 
 export { getUser, getUsers, switchCurrentUser, addNewPlayer,
-    updateCurrentUser, updateHighScore, getAllHighScore }
+    updateCurrentUser, deleteUser, updateHighScore,
+    getAllHighScore }

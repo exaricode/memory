@@ -73,6 +73,7 @@ const switchUserDiv = {
     switchUser: document.getElementById('switchUser'),
     allUsers: document.getElementById('allUsers'),
     newUser: document.getElementById('newUser'),
+    delete: document.getElementById('deleteUser'),
     back: document.getElementById('switchUserBack')
 }
 
@@ -148,8 +149,10 @@ startFieldDiv.changeUser.addEventListener('click', () => {
         // setup click event to switch existing users
         li.addEventListener('click', (e) => {
             let user = ls.switchCurrentUser(e.target.innerHTML);
-            updateCurrentUser(currentUser, user);
-            startOfGame();
+            if (user !== false) {
+                updateCurrentUser(currentUser, user);
+                startOfGame();
+            }
         })
         switchUserDiv.allUsers.appendChild(li);
     }
@@ -165,7 +168,7 @@ startFieldDiv.highscore.addEventListener('click', () => {
 // setup click event to switch user
 switchUserDiv.newUser.addEventListener('click', () => {
     let user = ls.addNewPlayer();
-    if (user) {
+    if (user != false) {
         updateCurrentUser(currentUser, user);
         startOfGame();
     }   
@@ -197,6 +200,31 @@ switchUserDiv.back.addEventListener('click', () => {
     switchUserDiv.switchUser.style.display = 'none';
     startFieldDiv.startField.style.display = 'flex';
 });
+
+// delete a user
+switchUserDiv.delete.addEventListener('click', () => {
+    let len = switchUserDiv.allUsers.children.length;
+    for (let i = 0; i < len; i++){
+        let btn = document.createElement('button');
+        btn.innerHTML = 'X';
+        btn.style.backgroundColor = 'red';
+
+        // check if li element has a child element
+        if (switchUserDiv.allUsers.children[i].children.length == 0) {
+            switchUserDiv.allUsers.children[i].appendChild(btn);
+            btn.addEventListener('click', (e) => {
+                // e.target.parentElement
+                let t = e.target.parentElement.firstChild.data;
+                ls.deleteUser(t);
+                switchUserDiv.allUsers.removeChild(e.target.parentElement);
+            })
+        } else {
+            switchUserDiv.allUsers.children[i]
+                .removeChild(switchUserDiv.allUsers
+                    .children[i].lastChild);
+        }
+    }
+})
 
 // get all highscores from a boardsize
 function appendHighScores(size) {
