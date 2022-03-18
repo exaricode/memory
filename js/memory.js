@@ -2,10 +2,10 @@
 import * as ls from './localstorage.js';
 
 const myField = document.getElementById('field');
-const boardSize = document.getElementById('boardSize');
-const resetGameBtn = document.getElementById('resetGameBtn');
 
 let interval;
+let timeOut;
+
 let myCardArray;
 let clickCount = 0;
 let tempCard1, tempCard2;
@@ -34,7 +34,8 @@ const startFieldDiv = {
     playerName: document.getElementById('playerName'),
     gameStats: document.getElementById('gameStats'),
     changeUser: document.getElementById('changeUser'),
-    highscore: document.getElementById('highscore')
+    highscore: document.getElementById('highscore'),
+    boardSize: document.getElementById('boardSize')
 }
 
 // current game elements
@@ -45,7 +46,8 @@ const currentGameStats = {
     minutes: document.getElementById('minutes'),
     seconds: document.getElementById('seconds'),
     min: 0,
-    sec: 0
+    sec: 0,
+    resetGameBtn: document.getElementById('resetGameBtn')
 }
 
 // end field elements
@@ -108,15 +110,18 @@ window.addEventListener('load', () => {
 myField.addEventListener('click', onClickCard);
 
 // setup change event for select field size
-boardSize.addEventListener('change', (e) => {
-    startFieldDiv.startField.style.display = 'none';
-    currentGameStats.turnTimer.style.display = 'flex';
+startFieldDiv.boardSize.addEventListener('change', (e) => {
+    hideShowDisplay(startFieldDiv.startField,
+                    currentGameStats.turnTimer);
     onSelectFieldSize(e);
 });
 
 // setup click event for resetting the game
-resetGameBtn.addEventListener('click', () => {
-    ls.updateCurrentUser(currentUser);
+currentGameStats.resetGameBtn.addEventListener('click', () => {
+    let user = ls.updateCurrentUser(currentUser);
+    clearTimeout(timeOut);
+    myField.addEventListener('click', onClickCard);
+    updateCurrentUser(currentUser, user);
     startOfGame();
 });
 
@@ -127,8 +132,8 @@ endFieldDiv.playAgain.addEventListener('click', () => {
 
 // setup click event: show player statistics
 startFieldDiv.gameStats.addEventListener('click', () => {
-    startFieldDiv.startField.style.display = 'none';
-    totalStatsDiv.totalStats.style.display = 'flex';
+    hideShowDisplay(startFieldDiv.startField,
+                    totalStatsDiv.totalStats);
     totalStatsDiv.totalPlay.innerHTML = currentUser.played;
     totalStatsDiv.totalComplete.innerHTML = currentUser.succes;
     totalStatsDiv.bestGame.innerHTML = currentUser.best;
@@ -137,8 +142,8 @@ startFieldDiv.gameStats.addEventListener('click', () => {
 
 // setup click event: switch to change user screen
 startFieldDiv.changeUser.addEventListener('click', () => {
-    switchUserDiv.switchUser.style.display = 'flex';
-    startFieldDiv.startField.style.display = 'none';
+    hideShowDisplay(startFieldDiv.startField,
+                    switchUserDiv.switchUser);
     while (switchUserDiv.allUsers.hasChildNodes()) {
         switchUserDiv.allUsers.removeChild(switchUserDiv.allUsers.firstChild);
     }
@@ -160,8 +165,8 @@ startFieldDiv.changeUser.addEventListener('click', () => {
 
 // setup click event switch to highscore screen
 startFieldDiv.highscore.addEventListener('click', () => {
-    startFieldDiv.startField.style.display = 'none';
-    highScoreDiv.all.style.display = 'flex';
+    hideShowDisplay(startFieldDiv.startField,
+                    highScoreDiv.all);
     appendHighScores(4);
 });
 
@@ -181,24 +186,24 @@ highScoreDiv.hsBtn.forEach((elem) => {
     });
 });
 
-// setup click event for back
+// setup click events for back
 
 // go back to start from statistics
 totalStatsDiv.back.addEventListener('click', () => {
-    totalStatsDiv.totalStats.style.display = 'none';
-    startFieldDiv.startField.style.display = 'flex';
+    hideShowDisplay(totalStatsDiv.totalStats,
+                    startFieldDiv.startField);
 });
 
 // go back to start from highscores
 highScoreDiv.back.addEventListener('click', () => {
-    highScoreDiv.all.style.display = 'none';
-    startFieldDiv.startField.style.display = 'flex';
+    hideShowDisplay(highScoreDiv.all,
+                    startFieldDiv.startField);
 });
 
 // go back to start from switch user
 switchUserDiv.back.addEventListener('click', () => {
-    switchUserDiv.switchUser.style.display = 'none';
-    startFieldDiv.startField.style.display = 'flex';
+    hideShowDisplay(switchUserDiv.switchUser,
+                    startFieldDiv.startField);
 });
 
 // delete a user
@@ -213,7 +218,6 @@ switchUserDiv.delete.addEventListener('click', () => {
         if (switchUserDiv.allUsers.children[i].children.length == 0) {
             switchUserDiv.allUsers.children[i].appendChild(btn);
             btn.addEventListener('click', (e) => {
-                // e.target.parentElement
                 let t = e.target.parentElement.firstChild.data;
                 ls.deleteUser(t);
                 switchUserDiv.allUsers.removeChild(e.target.parentElement);
@@ -224,7 +228,7 @@ switchUserDiv.delete.addEventListener('click', () => {
                     .children[i].lastChild);
         }
     }
-})
+});
 
 // get all highscores from a boardsize
 function appendHighScores(size) {
@@ -267,7 +271,7 @@ function populateField(board) {
 
         // create cover img element
         let cover = document.createElement('img');
-        // cover.setAttribute('src', 'img/cover.png');
+        cover.setAttribute('src', 'img/cover.png');
         cover.setAttribute('class', 'covered');
         newTile.appendChild(cover);
 
@@ -277,14 +281,15 @@ function populateField(board) {
 
 // switch covered cards
 function onClickCard(e) {
+    let temp = e.target.parentElement.firstChild;
     // show image behind cover
     if (e.target.className === 'covered'){
-        // playSound(e);
+        playSound(e);
         e.target.className = 'uncovered';
     } 
 
     // ignore click on myField
-    if (e.target.className.match(/^board/)) {
+    if (e.target.className.match(/^board/) || e.target == temp) {
         return;
     }
 
@@ -294,7 +299,7 @@ function onClickCard(e) {
         tempCard2 = e.target.parentElement.firstChild;
         myField.removeEventListener('click', onClickCard);
         currentGameStats.turnCount.innerHTML = clickCount / 2;
-        setTimeout(checkCards, 100);
+        timeOut = setTimeout(checkCards, 1500);
     } else {
         tempCard1 = e.target.parentElement.firstChild;
     }
@@ -379,27 +384,29 @@ function checkCards() {
     myField.addEventListener('click', onClickCard);
 }
 
-// display the start screen
+// display the start screen and reset values
 function startOfGame() {
     clearInterval(interval);
-    boardSize.value = 0;
-    currentGameStats.turnTimer.style.display = 'none';
+    startFieldDiv.boardSize.value = 0;
+    hideShowDisplay(currentGameStats.turnTimer);
     currentGameStats.min = 0;
     currentGameStats.sec = 0;
     currentGameStats.minutes.innerHTML = '00';
     currentGameStats.seconds.innerHTML = '00';
     currentGameStats.turnCount.innerHTML = '0';
-    myField.style.display = 'none';
+    hideShowDisplay(myField);
     clickCount = 0;
     tempCard1 = '';
     tempCard2 = '';
     numSets = 0;
     foundSets = 0;
-    startFieldDiv.startField.style.display = 'flex';
-    currentGameStats.turnTimer.style.display = 'none';
-    endFieldDiv.endField.style.display = 'none';
-    totalStatsDiv.totalStats.style.display = 'none';
-    switchUserDiv.switchUser.style.display = 'none';
+
+    hideShowDisplay(currentGameStats.turnTimer, 
+                startFieldDiv.startField);
+    hideShowDisplay(endFieldDiv.endField);
+    hideShowDisplay(totalStatsDiv.totalStats);
+    hideShowDisplay(switchUserDiv.switchUser);
+    
     while (myField.hasChildNodes()) {
         myField.removeChild(myField.firstChild);
     }
@@ -412,31 +419,22 @@ function endOfGame() {
         clearInterval(interval);
         let turns = currentGameStats.turnCount.innerHTML;
         let time = `${currentGameStats.minutes.innerHTML} : ${currentGameStats.seconds.innerHTML}`;
-        let bool = ls.updateHighScore(currentUser.name, turns, time, boardSize.value);
+        let bool = ls.updateHighScore(currentUser.name, turns,
+                             time, startFieldDiv.boardSize.value);
         
         if (bool === true) {
             endFieldDiv.newHighscore.innerHTML = "New High Score!"
         }
         currentUser.best = Number(turns);
         currentUser.succes++;
-        ls.updateCurrentUser(currentUser);
-        endFieldDiv.endField.style.display = 'flex';
+        let user = ls.updateCurrentUser(currentUser);
+        updateCurrentUser(currentUser, user);
+        hideShowDisplay(currentGameStats.turnTimer,
+                        endFieldDiv.endField);
         endFieldDiv.endMinutes.innerHTML = currentGameStats.minutes.innerHTML;
         endFieldDiv.endSeconds.innerHTML = currentGameStats.seconds.innerHTML;
         endFieldDiv.endTurn.innerHTML = currentGameStats.turnCount.innerHTML;
-        currentGameStats.turnTimer.style.display = 'none';
-        currentGameStats.min = 0;
-        currentGameStats.sec = 0;
-        currentGameStats.minutes.innerHTML = '';
-        currentGameStats.seconds.innerHTML = '';
-        currentGameStats.turnCount.innerHTML = '';
-        currentGameStats.found.innerHTML = '';
-        myField.style.display = 'none';
-        clickCount = 0;
-        tempCard1 = '';
-        tempCard2 = '';
-        numSets = 0;
-        foundSets = 0;
+        hideShowDisplay(myField);
     }
 }
 
@@ -447,7 +445,14 @@ function updateCurrentUser(current, user){
         current.succes = user.succes;
         current.best = user.best;
         current.rate = user.rate;
-        startFieldDiv.playerName.innerHTML =`hello ${current.name}`;
+        startFieldDiv.playerName.innerHTML =`Hello ${current.name}`;
+}
+
+function hideShowDisplay(hide, show = null) {
+    hide.style.display = 'none';
+    if (show != null) {
+        show.style.display = 'flex';
+    }
 }
 
 // keep track of time

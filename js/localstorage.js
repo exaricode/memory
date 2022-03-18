@@ -2,9 +2,9 @@
 // check and set localstorage for stored items
 function checkLocalStorage() {
     if (!localStorage) {
-        return "Acces local storage denied"
+        return "Access local storage denied";
     }
-    return true
+    return true;
 }
 
 // add a new name to local storage
@@ -39,7 +39,7 @@ function addNewPlayer(){
     const users = getUsers();
     if (users.length > 4) {
         alert('max 5 users');
-        return
+        return false;
     }
     const user = addPlayerName(users);
     if (user === false) {
@@ -60,7 +60,6 @@ function getUsers() {
 
 // set all users in local storage
 function setUsers(users) {
-    //localStorage.removeItem('users');
     localStorage.setItem('users', JSON.stringify(users));
 }
 
@@ -99,7 +98,7 @@ function switchCurrentUser(e) {
 
 // update current user
 function updateCurrentUser(user) {
-    let users = JSON.parse(localStorage.getItem('users'));
+    let users = getUsers();
     let rate = Number.parseFloat(Number(user.succes) / Number(user.played) * 100);
 
     users[0].played = user.played;
@@ -114,11 +113,11 @@ function updateCurrentUser(user) {
     }
          
     setUsers(users);
+    return users[0];
 }
 
 // delete a user
 function deleteUser(user) {
-    console.log(user);
     let users = getUsers();
     for (let u in users) {
         if (users[u].name === user) {
