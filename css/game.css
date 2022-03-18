@@ -71,7 +71,7 @@ img {
 }
 
 .show > *:first-child, .show > *:last-child {
-  margin-block-start: auto;
+  margin-block-start: 2rem;
   margin-block-end: auto;
 }
 
@@ -90,7 +90,7 @@ img {
 }
 
 .show > hr {
-  margin: 0;
+  margin: .5rem;
   background-color: rgba(0, 0, 0, 1);
   height: 1px;
 }
@@ -105,14 +105,32 @@ img {
   margin: 0 auto;
 }
 
+#allUsers {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  text-align: start;
+}
+
+#allUsers button {
+  margin-inline-start: 1.5rem;
+  padding-inline-start: .5rem;
+  padding-inline-end: .5rem;
+}
+
 @media screen and (min-width: 768px) {
-  #field {
+  #field, body > * {
     max-width: 768px;
+    margin-inline-end: auto;
+    margin-inline-start: auto;
   }
 
   #field .covered, #field .uncovered {
     width: calc(100% - 10px);
   }
-
 }
 
