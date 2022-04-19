@@ -122,6 +122,14 @@ li {
   padding-inline-end: .5rem;
 }
 
+.btn {
+  border: 1px solid black;
+  border-radius: 10% / 15%;
+  padding: .5rem 1rem;
+  cursor: pointer;
+  background-color: cyan;
+}
+
 @media screen and (min-width: 768px) {
   #field, body > * {
     max-width: 768px;
